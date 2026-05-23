@@ -141,6 +141,40 @@ def update_finished(run_id: str, status: str, exit_code: int | None) -> None:
         )
 
 
+def record_action(args: argparse.Namespace) -> int:
+    if not args.goal.strip():
+        print("--goal is required and cannot be empty", file=sys.stderr)
+        return 2
+
+    ensure_storage()
+    run_id = str(uuid.uuid4())
+    command = args.command or "manual record"
+    cwd = str(Path(args.cwd).resolve()) if args.cwd else os.getcwd()
+    now = utc_now()
+    run = {
+        "id": run_id,
+        "initiated_by": "ai_agent",
+        "goal": args.goal.strip(),
+        "command_display": redact(command),
+        "command_json": json.dumps({"recorded": True, "command": command}, ensure_ascii=False),
+        "cwd": cwd,
+        "pid": None,
+        "status": "recorded",
+        "mode": "record",
+        "started_at": args.started_at or now,
+        "ended_at": args.ended_at or now,
+        "exit_code": args.exit_code,
+        "stdout_log": None,
+        "stderr_log": None,
+        "notes": args.notes,
+    }
+    insert_run(run)
+    print(f"id: {run_id}")
+    print("status: recorded")
+    print(f"goal: {args.goal.strip()}")
+    return 0
+
+
 def build_popen_args(command: list[str], shell: bool) -> tuple[list[str] | str, bool]:
     if shell:
         return " ".join(command), True
@@ -320,6 +354,15 @@ def parse_args(argv: Iterable[str]) -> argparse.Namespace:
     add_launch_parser("run", "Run a command, wait for completion, and record the result.")
     add_launch_parser("start", "Start a long-running command and return immediately.")
 
+    p_record = sub.add_parser("record", help="Record an agent action that happened outside this launcher.")
+    p_record.add_argument("--goal", required=True, help="Required purpose of the recorded agent action.")
+    p_record.add_argument("--command", help="Command or action summary to display.")
+    p_record.add_argument("--cwd", help="Working directory. Defaults to the current directory.")
+    p_record.add_argument("--notes", help="Optional extra note for the history record.")
+    p_record.add_argument("--started-at", help="Optional ISO timestamp for when the action started.")
+    p_record.add_argument("--ended-at", help="Optional ISO timestamp for when the action ended.")
+    p_record.add_argument("--exit-code", type=int, help="Optional exit code when the action represented a command.")
+
     p_list = sub.add_parser("list", help="Show currently running agent-initiated processes.")
     p_list.add_argument("--limit", type=int, default=20)
 
@@ -343,6 +386,8 @@ def main(argv: Iterable[str] = sys.argv[1:]) -> int:
         if args.command and args.command[0] == "--":
             args.command = args.command[1:]
         return launch(args, wait=args.command_name == "run")
+    if args.command_name == "record":
+        return record_action(args)
     if args.command_name == "list":
         return list_runs(args, running_only=True)
     if args.command_name == "history":

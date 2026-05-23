@@ -25,6 +25,7 @@
     <section class="summary" aria-label="&#1057;&#1074;&#1086;&#1076;&#1082;&#1072;">
       <div><span id="runningCount">0</span><small data-i18n="summaryRunning">&#1089;&#1077;&#1081;&#1095;&#1072;&#1089;</small></div>
       <div><span id="doneCount">0</span><small data-i18n="summaryDone">&#1079;&#1072;&#1074;&#1077;&#1088;&#1096;&#1077;&#1085;&#1086;</small></div>
+      <div><span id="stoppedCount">0</span><small data-i18n="summaryStopped">&#1086;&#1089;&#1090;&#1072;&#1085;&#1086;&#1074;&#1083;&#1077;&#1085;&#1086;</small></div>
       <div><span id="failedCount">0</span><small data-i18n="summaryFailed">&#1089; &#1086;&#1096;&#1080;&#1073;&#1082;&#1086;&#1081;</small></div>
     </section>
 
@@ -37,11 +38,12 @@
       <input id="search" type="search" placeholder="&#1055;&#1086;&#1080;&#1089;&#1082; &#1087;&#1086; &#1094;&#1077;&#1083;&#1080;, &#1082;&#1086;&#1084;&#1072;&#1085;&#1076;&#1077;, PID &#1080;&#1083;&#1080; &#1087;&#1072;&#1087;&#1082;&#1077;" autocomplete="off">
       <select id="statusFilter" aria-label="&#1057;&#1090;&#1072;&#1090;&#1091;&#1089;">
         <option value="" data-i18n="allStatuses">&#1042;&#1089;&#1077; &#1089;&#1090;&#1072;&#1090;&#1091;&#1089;&#1099;</option>
-        <option value="running">running</option>
-        <option value="completed">completed</option>
-        <option value="failed">failed</option>
-        <option value="stopped_by_agent">stopped_by_agent</option>
-        <option value="ended_external">ended_external</option>
+        <option value="running" data-status-option="running">running</option>
+        <option value="completed" data-status-option="completed">completed</option>
+        <option value="failed" data-status-option="failed">failed</option>
+        <option value="recorded" data-status-option="recorded">recorded</option>
+        <option value="stopped_by_agent" data-status-option="stopped_by_agent">stopped_by_agent</option>
+        <option value="ended_external" data-status-option="ended_external">ended_external</option>
       </select>
     </section>
 

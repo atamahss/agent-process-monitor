@@ -38,11 +38,14 @@ scripts\agent-run.ps1 history
 scripts\agent-run.ps1 show <id> --logs
 scripts\agent-run.ps1 stop <id>
 scripts\agent-run.ps1 where
+scripts\agent-run.ps1 record --goal "Prepared GitHub repository" --command "git init; git commit"
 ```
 
 `run` waits for completion and records the exit code. `start` returns
 immediately and keeps the process in `running` until a later
 `list`/`history`/`show` notices that the PID ended or until `stop` is used.
+`record` adds an explicit history entry for an agent action that already
+happened outside the launcher.
 
 ## Browser UI
 

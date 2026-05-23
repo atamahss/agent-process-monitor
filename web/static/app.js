@@ -6,6 +6,7 @@ const I18N = {
     refresh: '\u041e\u0431\u043d\u043e\u0432\u0438\u0442\u044c',
     summaryRunning: '\u0441\u0435\u0439\u0447\u0430\u0441',
     summaryDone: '\u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e',
+    summaryStopped: '\u043e\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u043e \u0430\u0433\u0435\u043d\u0442\u043e\u043c',
     summaryFailed: '\u0441 \u043e\u0448\u0438\u0431\u043a\u043e\u0439',
     tabRunning: '\u0421\u0435\u0439\u0447\u0430\u0441',
     tabHistory: '\u0418\u0441\u0442\u043e\u0440\u0438\u044f',
@@ -13,6 +14,8 @@ const I18N = {
     allStatuses: '\u0412\u0441\u0435 \u0441\u0442\u0430\u0442\u0443\u0441\u044b',
     empty: '\u0417\u0430\u043f\u0438\u0441\u0435\u0439 \u043f\u043e\u043a\u0430 \u043d\u0435\u0442.',
     details: '\u0414\u0435\u0442\u0430\u043b\u0438',
+    detailsButton: '\u0414\u0435\u0442\u0430\u043b\u0438',
+    stopButton: '\u0421\u0442\u043e\u043f',
     command: '\u041a\u043e\u043c\u0430\u043d\u0434\u0430',
     folder: '\u041f\u0430\u043f\u043a\u0430',
     start: '\u0421\u0442\u0430\u0440\u0442',
@@ -21,6 +24,15 @@ const I18N = {
     sec: '\u0441\u0435\u043a',
     min: '\u043c\u0438\u043d',
     hour: '\u0447',
+    statuses: {
+      running: '\u0432 \u0440\u0430\u0431\u043e\u0442\u0435',
+      completed: '\u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e',
+      failed: '\u043e\u0448\u0438\u0431\u043a\u0430',
+      recorded: '\u0437\u0430\u043f\u0438\u0441\u0430\u043d\u043e',
+      stopped_by_agent: '\u043e\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u043e \u0430\u0433\u0435\u043d\u0442\u043e\u043c',
+      ended_external: '\u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e \u0438\u0437\u0432\u043d\u0435',
+      ended_unknown: '\u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e, \u043f\u0440\u0438\u0447\u0438\u043d\u0430 \u043d\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043d\u0430',
+    },
   },
   en: {
     loading: 'Loading...',
@@ -28,6 +40,7 @@ const I18N = {
     refresh: 'Refresh',
     summaryRunning: 'running now',
     summaryDone: 'completed',
+    summaryStopped: 'stopped by agent',
     summaryFailed: 'failed',
     tabRunning: 'Running',
     tabHistory: 'History',
@@ -35,6 +48,8 @@ const I18N = {
     allStatuses: 'All statuses',
     empty: 'No records yet.',
     details: 'Details',
+    detailsButton: 'Details',
+    stopButton: 'Stop',
     command: 'Command',
     folder: 'Folder',
     start: 'Started',
@@ -43,6 +58,15 @@ const I18N = {
     sec: 'sec',
     min: 'min',
     hour: 'h',
+    statuses: {
+      running: 'running',
+      completed: 'completed',
+      failed: 'failed',
+      recorded: 'recorded',
+      stopped_by_agent: 'stopped by agent',
+      ended_external: 'ended externally',
+      ended_unknown: 'ended, reason unknown',
+    },
   },
 };
 
@@ -62,6 +86,7 @@ const el = {
   dbPath: document.querySelector('#dbPath'),
   runningCount: document.querySelector('#runningCount'),
   doneCount: document.querySelector('#doneCount'),
+  stoppedCount: document.querySelector('#stoppedCount'),
   failedCount: document.querySelector('#failedCount'),
   dialog: document.querySelector('#detailsDialog'),
   closeDialog: document.querySelector('#closeDialog'),
@@ -78,10 +103,17 @@ function t(key) {
   return I18N[state.lang][key];
 }
 
+function statusLabel(status) {
+  return I18N[state.lang].statuses[status] || status;
+}
+
 function applyLanguage() {
   document.documentElement.lang = state.lang;
   document.querySelectorAll('[data-i18n]').forEach((node) => {
     node.textContent = t(node.dataset.i18n);
+  });
+  document.querySelectorAll('[data-status-option]').forEach((node) => {
+    node.textContent = statusLabel(node.dataset.statusOption);
   });
   el.search.placeholder = t('searchPlaceholder');
   el.refresh.title = t('refresh');
@@ -132,8 +164,9 @@ function matches(run) {
 
 function renderCounts(allRuns) {
   el.runningCount.textContent = allRuns.filter((run) => run.status === 'running').length;
-  el.doneCount.textContent = allRuns.filter((run) => run.status === 'completed').length;
-  el.failedCount.textContent = allRuns.filter((run) => ['failed', 'ended_external'].includes(run.status)).length;
+  el.doneCount.textContent = allRuns.filter((run) => ['completed', 'recorded'].includes(run.status)).length;
+  el.stoppedCount.textContent = allRuns.filter((run) => run.status === 'stopped_by_agent').length;
+  el.failedCount.textContent = allRuns.filter((run) => ['failed', 'ended_external', 'ended_unknown'].includes(run.status)).length;
 }
 
 function render() {
@@ -152,19 +185,24 @@ function render() {
         <div class="cwd"></div>
       </div>
       <div class="rowActions">
-        <span class="badge ${run.status}">${run.status}</span>
-        <button type="button" data-action="details">Details</button>
-        ${run.status === 'running' ? '<button class="danger" type="button" data-action="stop">Stop</button>' : ''}
+        <span class="badge ${run.status}"></span>
+        <button type="button" data-action="details"></button>
+        ${run.status === 'running' ? '<button class="danger" type="button" data-action="stop"></button>' : ''}
       </div>
     `;
     item.querySelector('.goal').textContent = run.goal;
     item.querySelector('.meta').textContent = `PID ${run.pid || '-'} - ${fmtDate(run.started_at)} - ${duration(run)} - exit ${run.exit_code ?? '-'}`;
     item.querySelector('.cmd').textContent = run.command_display;
     item.querySelector('.cwd').textContent = run.cwd;
+    item.querySelector('.badge').textContent = statusLabel(run.status);
+    item.querySelector('[data-action="details"]').textContent = t('detailsButton');
     item.querySelector('[data-action="details"]').addEventListener('click', () => showDetails(run.id));
 
     const stopBtn = item.querySelector('[data-action="stop"]');
-    if (stopBtn) stopBtn.addEventListener('click', () => stopRun(run));
+    if (stopBtn) {
+      stopBtn.textContent = t('stopButton');
+      stopBtn.addEventListener('click', () => stopRun(run));
+    }
     el.runs.append(item);
   }
 }
@@ -190,7 +228,7 @@ async function showDetails(id) {
   const run = data.run;
 
   el.detailTitle.textContent = run.goal;
-  el.detailMeta.textContent = `${run.status} - PID ${run.pid || '-'} - ${duration(run)}`;
+  el.detailMeta.textContent = `${statusLabel(run.status)} - PID ${run.pid || '-'} - ${duration(run)}`;
   el.detailFields.innerHTML = '';
 
   const fields = [
