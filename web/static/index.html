@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Process Monitor</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <h1>Agent Process Monitor</h1>
+        <p id="dbPath">&#1047;&#1072;&#1075;&#1088;&#1091;&#1079;&#1082;&#1072;...</p>
+      </div>
+      <div class="actions">
+        <div class="langSwitch" aria-label="Language">
+          <button id="langRu" class="lang active" type="button">RU</button>
+          <button id="langEn" class="lang" type="button">EN</button>
+        </div>
+        <button id="refreshBtn" type="button" title="Refresh">Refresh</button>
+      </div>
+    </header>
+
+    <section class="summary" aria-label="&#1057;&#1074;&#1086;&#1076;&#1082;&#1072;">
+      <div><span id="runningCount">0</span><small data-i18n="summaryRunning">&#1089;&#1077;&#1081;&#1095;&#1072;&#1089;</small></div>
+      <div><span id="doneCount">0</span><small data-i18n="summaryDone">&#1079;&#1072;&#1074;&#1077;&#1088;&#1096;&#1077;&#1085;&#1086;</small></div>
+      <div><span id="failedCount">0</span><small data-i18n="summaryFailed">&#1089; &#1086;&#1096;&#1080;&#1073;&#1082;&#1086;&#1081;</small></div>
+    </section>
+
+    <nav class="tabs" aria-label="&#1042;&#1082;&#1083;&#1072;&#1076;&#1082;&#1080;">
+      <button class="tab active" data-view="running" data-i18n="tabRunning" type="button">&#1057;&#1077;&#1081;&#1095;&#1072;&#1089;</button>
+      <button class="tab" data-view="history" data-i18n="tabHistory" type="button">&#1048;&#1089;&#1090;&#1086;&#1088;&#1080;&#1103;</button>
+    </nav>
+
+    <section class="toolbar">
+      <input id="search" type="search" placeholder="&#1055;&#1086;&#1080;&#1089;&#1082; &#1087;&#1086; &#1094;&#1077;&#1083;&#1080;, &#1082;&#1086;&#1084;&#1072;&#1085;&#1076;&#1077;, PID &#1080;&#1083;&#1080; &#1087;&#1072;&#1087;&#1082;&#1077;" autocomplete="off">
+      <select id="statusFilter" aria-label="&#1057;&#1090;&#1072;&#1090;&#1091;&#1089;">
+        <option value="" data-i18n="allStatuses">&#1042;&#1089;&#1077; &#1089;&#1090;&#1072;&#1090;&#1091;&#1089;&#1099;</option>
+        <option value="running">running</option>
+        <option value="completed">completed</option>
+        <option value="failed">failed</option>
+        <option value="stopped_by_agent">stopped_by_agent</option>
+        <option value="ended_external">ended_external</option>
+      </select>
+    </section>
+
+    <section class="content">
+      <div id="empty" class="empty" data-i18n="empty" hidden>&#1047;&#1072;&#1087;&#1080;&#1089;&#1077;&#1081; &#1087;&#1086;&#1082;&#1072; &#1085;&#1077;&#1090;.</div>
+      <div id="runs" class="runs" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <dialog id="detailsDialog">
+    <article class="dialogBody">
+      <header class="dialogHead">
+        <div>
+          <h2 id="detailTitle">&#1044;&#1077;&#1090;&#1072;&#1083;&#1080;</h2>
+          <p id="detailMeta"></p>
+        </div>
+        <button id="closeDialog" type="button" title="&#1047;&#1072;&#1082;&#1088;&#1099;&#1090;&#1100;">Close</button>
+      </header>
+      <dl id="detailFields" class="fields"></dl>
+      <h3>stdout</h3>
+      <pre id="stdoutLog"></pre>
+      <h3>stderr</h3>
+      <pre id="stderrLog"></pre>
+    </article>
+  </dialog>
+
+  <script src="/app.js"></script>
+</body>
+</html>

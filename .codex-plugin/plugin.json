@@ -1,0 +1,30 @@
+﻿{
+  "name": "agent-process-monitor",
+  "version": "0.1.0",
+  "description": "Track processes intentionally launched by the AI agent with a required launch goal and local history.",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "keywords": [
+    "processes",
+    "agent-history",
+    "launcher"
+  ],
+  "interface": {
+    "displayName": "Agent Process Monitor",
+    "shortDescription": "History for AI-agent initiated processes.",
+    "longDescription": "Agent Process Monitor records only processes intentionally started through its launcher and requires a clear goal for each launch.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": [
+      "Local",
+      "Process history"
+    ],
+    "defaultPrompt": [
+      "Show agent process history.",
+      "Run this command with a tracked goal."
+    ],
+    "brandColor": "#2563EB"
+  }
+}
