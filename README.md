@@ -1,5 +1,19 @@
 # Agent Process Monitor
 
+## Description / Описание
+
+**EN:** Agent Process Monitor tracks only processes intentionally launched by an
+AI agent. Every tracked launch requires a clear goal, so the local history shows
+what was started, why it was started, when it finished, and where to inspect its
+logs.
+
+**RU:** Agent Process Monitor отслеживает только процессы, которые ИИ-агент
+запустил намеренно. Для каждого запуска обязательна понятная цель, поэтому в
+локальной истории видно, что было запущено, зачем, когда завершилось и где
+посмотреть логи.
+
+## Overview
+
 Agent Process Monitor is a local Codex plugin and launcher for tracking only the
 processes intentionally started by an AI agent.
 
