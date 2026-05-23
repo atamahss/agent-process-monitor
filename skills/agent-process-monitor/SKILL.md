@@ -18,4 +18,4 @@ scripts\agent-run.ps1 list
 scripts\agent-run.ps1 history
 ```
 
-The history is stored locally under `%USERPROFILE%\.codex\agent-process-history`.
+The history is stored locally under `%USERPROFILE%\.codex\agent-process-history` by default.

@@ -74,10 +74,27 @@ def redact(text: str) -> str:
     return value
 
 
+def redact_argv(command: list[str]) -> list[str]:
+    redacted: list[str] = []
+    redact_next = False
+    for arg in command:
+        if redact_next:
+            redacted.append("***")
+            redact_next = False
+            continue
+
+        redacted_arg = redact(arg)
+        lower = arg.lower()
+        if lower in {"--token", "--password", "--passwd", "--pwd", "--secret", "--api-key", "--apikey", "--authorization"}:
+            redact_next = True
+        redacted.append(redacted_arg)
+    return redacted
+
+
 def command_to_display(command: list[str], shell: bool) -> str:
     if shell:
         return redact(" ".join(command))
-    return redact(subprocess.list2cmdline(command))
+    return redact(subprocess.list2cmdline(redact_argv(command)))
 
 
 def connect() -> sqlite3.Connection:
@@ -156,7 +173,7 @@ def record_action(args: argparse.Namespace) -> int:
         "initiated_by": "ai_agent",
         "goal": args.goal.strip(),
         "command_display": redact(command),
-        "command_json": json.dumps({"recorded": True, "command": command}, ensure_ascii=False),
+        "command_json": json.dumps({"recorded": True, "command": redact(command)}, ensure_ascii=False),
         "cwd": cwd,
         "pid": None,
         "status": "recorded",
@@ -215,7 +232,7 @@ def launch(args: argparse.Namespace, wait: bool) -> int:
         "initiated_by": "ai_agent",
         "goal": args.goal.strip(),
         "command_display": command_display,
-        "command_json": json.dumps({"argv": args.command, "shell": args.shell}, ensure_ascii=False),
+        "command_json": json.dumps({"argv": redact_argv(args.command), "shell": args.shell}, ensure_ascii=False),
         "cwd": cwd,
         "pid": process.pid,
         "status": "running",

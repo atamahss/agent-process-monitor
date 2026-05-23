@@ -28,8 +28,23 @@ CONTENT_TYPES = {
 }
 
 
+def display_path(value: str | None) -> str | None:
+    if not value:
+        return value
+    home = str(Path.home())
+    if value == home:
+        return "~"
+    if value.startswith(home + "\\") or value.startswith(home + "/"):
+        value = "~" + value[len(home):]
+    return value.replace(home + "\\", "~\\").replace(home + "/", "~/")
+
+
 def row_to_dict(row: sqlite3.Row) -> dict:
     data = dict(row)
+    data.pop("command_json", None)
+    for key in ("cwd", "stdout_log", "stderr_log"):
+        data[key] = display_path(data.get(key))
+    data["command_display"] = display_path(data.get("command_display"))
     data["short_id"] = data["id"][:8]
     return data
 
@@ -91,7 +106,7 @@ class Handler(BaseHTTPRequestHandler):
             limit = max(1, min(int(limit_raw), 500))
         except ValueError:
             limit = 100
-        self.send_json({"runs": get_runs(status, limit), "database": str(agent_run.DB_PATH)})
+        self.send_json({"runs": get_runs(status, limit), "database": display_path(str(agent_run.DB_PATH))})
 
     def handle_run_detail(self, path: str) -> None:
         parts = path.strip("/").split("/")
