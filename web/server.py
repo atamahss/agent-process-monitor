@@ -161,7 +161,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Serve Agent Process Monitor browser UI.")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--allow-remote", action="store_true", help="Allow binding to a non-loopback host.")
     args = parser.parse_args()
+    if args.host not in {"127.0.0.1", "localhost", "::1"} and not args.allow_remote:
+        print("Refusing non-loopback host without --allow-remote.", file=sys.stderr)
+        return 2
     agent_run.ensure_storage()
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     print(f"Agent Process Monitor UI: http://{args.host}:{args.port}", flush=True)
